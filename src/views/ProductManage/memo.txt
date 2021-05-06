@@ -1,0 +1,9 @@
+ProductManage {
+    ProductDetails{
+        InfoBasicProduct
+        DescriptionProduct
+        {
+                   
+        }
+    }
+}
