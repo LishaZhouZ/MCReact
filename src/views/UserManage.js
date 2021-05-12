@@ -28,12 +28,16 @@ class UserManage extends React.Component {
 
   componentDidMount() {
     //make a call to rest api
-    fetch('https://jsonplaceholder.typicode.com/users')
+    fetch('https://test.mchoicetravel.com:8080/boss/admins')
       .then(res => res.json())
       .then(res => {
         console.log(res)
-        this.setState({ users: res})
+        this.setState({ 
+          users: res.data,
+          errCode:res.errCode,
+          errMsg:res.errMsg})
       })
+      .catch(console.log)
   }
   
   render() {
@@ -109,7 +113,7 @@ class UserManage extends React.Component {
               >
                 <Nav role="tablist" variant="tabs">
                   <Nav.Item>
-                    <Nav.Link eventKey="info-plain">用户</Nav.Link>
+                    <Nav.Link eventKey="info-plain">系统管理员</Nav.Link>
                   </Nav.Item>
                   <Nav.Item>
                     <Nav.Link eventKey="account-plain">供应商</Nav.Link>
@@ -123,15 +127,13 @@ class UserManage extends React.Component {
                           <th className="border-0">用户编号</th>
                           <th className="border-0">用户名</th>
                           <th className="border-0">创建时间</th>
-                          <th className="border-0">手机号码</th>
-                          <th className="border-0">微信号</th>
                           <th className="border-0">操作选项</th>
                         </tr>
                       </thead>
                       <tbody>
                         {this.state.users.map(user => (
                           <tr key={user.id}>
-                            <UserList id={user.id} name={user.name}
+                            <UserList user={user}
                               checkButtonClick={() => this.handleDetailButtonClick(user.id)}
                               deleteButtonClick={() => this.handleDeleteButtonClick(user.id)} />
                           </tr>
@@ -147,15 +149,13 @@ class UserManage extends React.Component {
                           <th className="border-0">用户编号</th>
                           <th className="border-0">用户名</th>
                           <th className="border-0">创建时间</th>
-                          <th className="border-0">手机号码</th>
-                          <th className="border-0">微信号</th>
                           <th className="border-0">操作选项</th>
                         </tr>
                       </thead>
                       <tbody>
                         {this.state.users.map(user => (
                           <tr key={user.id}>
-                            <UserList id={user.id} name={user.name}
+                            <UserList user={user}
                               checkButtonClick={() => this.handleDetailButtonClick(user.id)}
                               deleteButtonClick={() => this.handleDeleteButtonClick(user.id)} />
                           </tr>
@@ -178,11 +178,9 @@ class UserManage extends React.Component {
 function UserList(props) {
   return (
     <>
-      <td>{props.id}</td>
-      <td>{props.name}</td>
-      <td>06.03.2008</td>
-      <td>0123456</td>
-      <td>gotravelbehappy</td>
+      <td>{props.user.id}</td>
+      <td>{props.user.username}</td>
+      <td>{props.user.createTime}</td>
 
       <td className="td-actions text-left">
         <OverlayTrigger overlay={<Tooltip id="edit_tooltip">查看</Tooltip>}>

@@ -24,20 +24,31 @@ class ProductDetails extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { id: this.props.match.params.id, info: [] };
-    console.log(this.props);
-    //this.setState({id: useParams()});
-    console.log("details" + this.state.id);
+    if(this.props.match.params.id){
+      this.state = {
+        id:this.props.match.params.id,
+        submitInfo: [] };}
+    else {
+      this.state = {
+        id:"",
+        submitInfo: [] };
+    }
+    console.log(this.props.match.params.id);
+
   }
 
+  
+
   componentDidMount() {
+    console.log(this.props.match.params.id)
+    console.log(this.state)
     //make a call to rest api
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then(res => res.json())
-      .then(res => {
-        console.log(res)
-        this.setState({ product: res })
-      })
+    //fetch('https://jsonplaceholder.typicode.com/users')
+    //  .then(res => res.json())
+    //  .then(res => {
+      //   console.log(res)
+      //   this.setState({ product: res })
+      // })
   }
   render() {
     return (

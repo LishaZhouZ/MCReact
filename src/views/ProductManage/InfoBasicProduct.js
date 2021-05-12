@@ -1,5 +1,11 @@
 import React from "react";
+// import { sha256 } from 'js-sha256';
+// const generateRandomString = (length=6)=>Math.random().toString(20).substr(2, length);
+// const randStr32 = generateRandomString(32);
+// const timestamp = Date.now();
+// const afterencry = sha256('randChar=' + randStr32 + 'timestamp=' + timestamp);
 
+const axios = require('axios').default;
 // react-bootstrap components
 import {
     Card,
@@ -24,18 +30,87 @@ import 'react-images-uploader/font.css';
 class InfoBasicProduct extends React.Component {
     constructor(props) {
         super(props);
+        this.handleSubmit = this.handleSubmit.bind(this);
+
         this.state = {
 
-            errCode: 1,
+            errCode: 0,
             errMsg: "",
-            id: props.id,
+            id: props.id?props.id:-1,
             filledTags: [
                 "可定明日",
                 "立刻确认",
                 "无购物",
-                "有条件退"]
+                "有条件退"],
+            submitInfo:{
+                cityId:'text',
+                departure:'text',
+                type:'text',
+                price:'text',
+                priceType:'text',
+                title:'text',
+                remark:'text',
+                feature1:'text',
+                feature2:'text',
+                feature3:'v',
+                feature4:'text',
+                startTime:'text',
+                endTime:'text',
+                places:'text',
+                placesDuration:'text',
+                lunch:'text',
+                bookTomorrow:'text',
+                collectionWay:'text',
+            }
         }
     };
+
+    handleSubmit(e){
+        e.preventDefault();
+        axios.post('https://test.mchoicetravel.com:8080/boss/oneday/product', 
+        {
+            cityId: this.state.submitInfo.cityId,
+            departure: this.state.submitInfo.departure,
+            type: this.state.submitInfo.type,
+            price: this.state.submitInfo.price,
+            priceType: this.state.submitInfo.priceType,
+            title: this.state.submitInfo.title,
+            remark: this.state.submitInfo.remark,
+            feature1: this.state.submitInfo.feature1,
+            feature2:this.state.submitInfo.feature2,
+            feature3:this.state.submitInfo.feature3,
+            feature4:this.state.submitInfo.feature4,
+            startTime:this.state.submitInfo.startTime,
+            endTime:this.state.submitInfo.endTime,
+            places:this.state.submitInfo.places,
+            placesDuration: this.state.submitInfo.placesDuration,
+            lunch:this.state.submitInfo.lunch,
+            bookTomorrow:this.state.submitInfo.bookTomorrow,
+            collectionWay:this.state.submitInfo.collectionWay,
+        },
+        // {   
+        //     headers: {
+        //     randChar:randStr32,
+        //     timestamp: timestamp,
+        //     sign:afterencry
+        //     }}
+        )
+          .then((response)=>{
+            this.setState({
+                errCode: response.errCode,
+                errMsg: response.errMsg,
+                id: response.data.productId
+            })
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+    }
+
+    componentDidMount() {
+        console.log(this.state.id);
+        console.log(this.state);
+    }
     render() {
         return (
             <>
@@ -45,7 +120,7 @@ class InfoBasicProduct extends React.Component {
                         <p className="card-category">商品编号：{this.state.id}</p>
                     </Card.Header>
                     <Card.Body>
-                        <Form>
+                        <Form onSubmit = {this.handleSubmit}>
                             <Row>
                                 <Col className="pr-1" md="2">
                                     <Form.Group>

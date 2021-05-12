@@ -1,5 +1,5 @@
 import React from "react";
-
+const axios = require('axios').default;
 // react-bootstrap components
 import { 
   Card, 
@@ -18,22 +18,30 @@ class ProductManage extends React.Component{
 
   constructor(props) {
     super(props);
-    this.state = {product: []};
+    this.state = {
+      errCode:0,
+      errMsg:"",
+      product: []};
   }
   componentDidMount(){
     //make a call to rest api
-    fetch('https://jsonplaceholder.typicode.com/users')
-    .then(res => res.json())
-    .then(res => {
-      //console.log(res)
-      this.setState({ product: res })
+    axios.get('https://test.mchoicetravel.com:8080/boss/oneday/products/0?')
+    .then((res) => {
+      console.log(res)
+      this.setState({ 
+        errCode: res.data.errCode,
+        errMsg: res.data.errMsg,
+        product: res.data.data })
     })
+    .catch(console.log)
   }
   /** handle the detail */
   handleDetailButtonClick=(id)=>{
       this.props.history.push('/admin/productDetails/'+ id);
   }
-
+  handleCreateButtonClick=()=>{
+    this.props.history.push('/admin/productDetails/');
+}
   /** */
   handleDeleteButtonClick=(id)=>{
     //update state to delete the thing. (push request may need)
@@ -153,10 +161,18 @@ class ProductManage extends React.Component{
           <Col md="12">
             <Card className="strpied-tabled-with-hover">
               <Card.Header>
+                <Row>
+                <Col>
                 <Card.Title as="h4">商品列表</Card.Title>
-                <p className="card-category">
-                  Here is a subtitle for this table
-                </p>
+                </Col>
+                <Col className="ml-auto" md="3">
+                  <Button className="btn-wd mr-1" variant="primary" onClick={this.handleCreateButtonClick}>
+                  添加商品
+                  </Button>
+                </Col>
+                
+                </Row>
+                
               </Card.Header>
               <Card.Body className="table-full-width table-responsive px-0">
                 <Table className="table-hover table-striped">
@@ -173,7 +189,7 @@ class ProductManage extends React.Component{
                   
                   {this.state.product.map(product =>(
                     <tr key={product.id}>
-                      <ProductList id={product.id} name = {product.name} 
+                      <ProductList product={product} 
                       checkButtonClick = {()=>this.handleDetailButtonClick(product.id)} 
                       deleteButtonClick={()=>this.handleDeleteButtonClick(product.id)}/>
                     </tr>
@@ -192,12 +208,14 @@ class ProductManage extends React.Component{
 }
 
 function ProductList (props){
+  const statusStr=["未审核","审核通过","审核未通过"];
+  const validStr = ["上线","下线"]
   return (
     <>
-    <td>{props.id}</td>
-    <td>{props.name}</td>
-    <td>上线</td>
-    <td>待审核</td>
+    <td>{props.product.id}</td>
+    <td>{props.product.title}</td>
+    <td>{statusStr[props.product.status]}</td>
+    <td>{validStr[props.product.valid]}</td>
 
     <td className="td-actions text-left">
       <OverlayTrigger overlay={<Tooltip id="edit_tooltip">查看</Tooltip>}>
@@ -210,8 +228,9 @@ function ProductList (props){
       </OverlayTrigger>
                           
       <OverlayTrigger overlay={<Tooltip id="remove_tooltip">删除</Tooltip>}>
-      <Button  className="btn-simple btn-link p-1"  type="button"  variant="danger">
-        <i className="fas fa-times"></i>
+      <Button  onClick ={props.deleteButtonClick}
+      className="btn-simple btn-link p-1"  type="button"  variant="danger">
+      <i className="fas fa-times"></i>
       </Button>
       </OverlayTrigger>
       </td>

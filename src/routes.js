@@ -71,7 +71,7 @@ var routes = [
       },
       {
         path: "/productDetails",
-        params: "/:id",
+        params: "/:id?",
         name: "产品细节",
         icon: "nc-icon nc-single-copy-04",
         component: ProductDetails,

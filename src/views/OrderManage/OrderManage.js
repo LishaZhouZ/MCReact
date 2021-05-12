@@ -21,6 +21,8 @@ class OrderManage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      errCode:0,
+      errMsg:"",
       activePage: 1,
       order: []
     };
@@ -33,12 +35,16 @@ class OrderManage extends React.Component {
 
   componentDidMount() {
     //make a call to rest api
-    fetch('https://jsonplaceholder.typicode.com/users')
+    fetch('https://test.mchoicetravel.com:8080/boss/oneday/orders/0?page=1&pageCount=20')
       .then(res => res.json())
       .then(res => {
         console.log(res)
-        this.setState({ order: res })
+        this.setState({ 
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+          order: res.data })
       })
+      .catch(console.log)
   }
   render() {
     return (
@@ -98,7 +104,6 @@ class OrderManage extends React.Component {
                       <th className="border-0">出行时间</th>
                       <th className="border-0">联系人</th>
                       <th className="border-0">联系人电话</th>
-                      <th className="border-0">预定数</th>
                       <th className="border-0">支付方式</th>
                       <th className="border-0">订单状态</th>
                       <th className="border-0">操作选项</th>
@@ -133,15 +138,14 @@ class OrderManage extends React.Component {
 function OrderList(props) {
   return (
     <>
-      <td>{props.order.id}</td>
-      <td>{props.order.name}</td>
-      <td>26.02.2006</td>
-      <td>35.03.2006</td>
-      <td>{props.order.username}</td>
-      <td>0123456789</td>
-      <td>5</td>
-      <td>支付宝</td>
-      <td>待审核</td>
+      <td>{props.order.orderNo}</td>
+      <td>一日游</td>
+      <td>{props.order.createTime}</td>
+      <td>{props.order.startTime}</td>
+      <td>{props.order.contactName}</td>
+      <td>{props.order.contactPhone}</td>
+      <td>{props.order.payWay}</td>
+      <td>{props.order.status}</td>
       <td>
         <OverlayTrigger overlay={<Tooltip id="edit_tooltip">查看</Tooltip>}>
           <Button onClick={props.checkButtonClick}
