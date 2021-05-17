@@ -41,10 +41,11 @@ import LockScreenPage from "views/Pages/LockScreenPage.js";
 
 
 import OrderManage from "views/OrderManage/OrderManage.js";
-import UserManage from "views/UserManage.js";
+import UserManage from "views/UserManage/UserManage.js";
 import ProductManage from "views/ProductManage/ProductManage.js";
 import ProductDetails from "views/ProductManage/ProductDetails.js";
-
+import NewUser from "views/UserManage/NewUser.js"
+import EditUser from "views/UserManage/EditUser.js"
 var routes = [
   {
     path: "/dashboard",
@@ -100,13 +101,49 @@ var routes = [
 
   },
   {
+    collapse: true,
     path: "/users-manage",
-    params:"",
-    name: "用户管理",
+    name:"用户管理",
+    state:"openUserManage",
     icon: "nc-icon nc-circle-09",
-    component: UserManage,
-    layout: "/admin",
+    params:"",
 
+    views:[
+      {
+        path:"/user-manage/admin-manage",
+        layout:"/admin",
+        name:"系统管理员",
+        params:"",
+        mini:"Ad",
+        component: UserManage
+      },
+      {
+        path:"/user-manage/supplier-manage",
+        layout:"/admin",
+        name:"供应商",
+        params:"",
+        mini:"Sup",
+        component: UserManage
+      },
+      {
+        path:"/user-manage/new-user",
+        layout:"/admin",
+        name:"新增用户",
+        params:"",
+        mini:"",
+        component: NewUser,
+        invisible: true
+      },
+      {
+        path:"/user-manage/edit-user",
+        layout:"/admin",
+        name:"修改用户",
+        params:"/:id?",
+        mini:"",
+        component: EditUser,
+        invisible: true
+      },
+    ]
   },
   
 ];
