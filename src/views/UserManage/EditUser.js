@@ -24,40 +24,44 @@ class EditUser extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleRegisterNewUser = this.handleRegisterNewUser.bind(this);
+        this.handleChangePwd = this.handleChangePwd.bind(this);
         this.displayAlert = this.displayAlert.bind(this);
         this.hideAlert = this.hideAlert.bind(this);
 
         this.state = {
             id:this.props.match.params.id,
-            registerEmail: "",
-            registerEmailState: true,
-            registerPassword: "",
-            registerPasswordState: true,
-            registerConfirmPassword: "",
-            registerConfirmPasswordState: true,
+            email: this.props.match.params.email,
+            oldPwd:"",
+            oldPwdState:true,
+            newPwd: "",
+            newPwdState: true,
+            confirmPwd: "",
+            confirmPwdState: true,
             alert: null,
 
             errCode: 1,
             errMsg: ""
         }
     };
+    componentDidMount(){
+        console.log(this.props)
+    }
     hideAlert() {
         this.setState({ alert: null });
     };
-    displayAlert(errCode,errMsg,registerEmail) {
+    displayAlert(errCode,errMsg) {
         if (errCode == 0) {
             this.setState({
                 alert:
                     <SweetAlert
                         success
                         style={{ display: "block", marginTop: "-100px" }}
-                        title="创建成功"
+                        title="修改成功"
                         onConfirm={() => this.hideAlert()}
                         onCancel={() => this.hideAlert()}
                         confirmBtnBsStyle="info"
                     >
-                        用户{registerEmail}已成功被创建!
+                        用户{this.state.mail}密码已成功修改!
           </SweetAlert>
             });
         }
@@ -66,7 +70,7 @@ class EditUser extends React.Component {
                 alert:
                     <SweetAlert
                         style={{ display: "block", marginTop: "-100px" }}
-                        title="创建失败"
+                        title="修改失败"
                         onConfirm={() => this.hideAlert()}
                         onCancel={() => this.hideAlert()}
                         confirmBtnBsStyle="info"
@@ -74,27 +78,27 @@ class EditUser extends React.Component {
                         {errMsg}
                     </SweetAlert>
             });
-            console.log("调用了alert方法")
-
         }
     };
 
-    handleRegisterNewUser(e) {
+    handleChangePwd(e) {
         e.preventDefault();
-        axios.post('https://test.mchoicetravel.com:8080/boss/admin',
-            {
-                username: this.state.registerEmail,
-                pwd: this.state.registerPassword
-            }
+        axios.put('https://test.mchoicetravel.com:8080/boss/admin/'+this.state.id,
+        {
+            
+            oldPwd: this.state.oldPwd,
+            newPwd: this.state.newPwd
+            
+          }
         ).then((response) => {
             console.log(response)
             this.setState({
                 errCode: response.data.errCode,
                 errMsg: response.data.errMsg,
             })
-            this.displayAlert(response.data.errCode, response.data.errMsg,this.state.registerEmail)
+            this.displayAlert(response.data.errCode, response.data.errMsg,this.state.email)
         })
-            .catch(function (error) {
+            .catch((error)=>{
                 console.log(error);
             });
     };
@@ -107,95 +111,102 @@ class EditUser extends React.Component {
                 <Container fluid>
                     <Row>
                         <Col className="mx-auto" md="6">
-                            <Form onSubmit={this.handleRegisterNewUser} action="" id="RegisterValidation" method="">
+                            <Form onSubmit={this.handleChangePwd} action="" id="handleChangePwd" method="">
                                 <Card>
                                     <Card.Header>
-                                        <Card.Title as="h4">新用户注册表格</Card.Title>
+                                        <Card.Title as="h4">修改密码</Card.Title>
                                     </Card.Header>
                                     <Card.Body>
+                                        <Form.Group>
+                                            <label>
+                                                用户名
+                                            </label>
+                                            <Form.Control plaintext readOnly 
+                                            defaultValue={this.state.email} />
+                                        </Form.Group>
                                         <Form.Group
                                             className={
                                                 "has-label " +
-                                                (this.state.registerEmailState ? "has-success" : "has-error")
+                                                (this.state.oldPwdState ? "has-success" : "has-error")
                                             }
                                         >
                                             <label>
-                                                电子邮箱 <span className="star">*</span>
+                                                旧密码 <span className="star">*</span>
                                             </label>
                                             <Form.Control
-                                                name="email"
-                                                type="email"
-                                                value={this.state.registerEmail}
+                                                id="oldPwd"
+                                                name="oldPwd"
+                                                type="password"
+                                                value={this.state.oldPwd}
                                                 onChange={(e) => {
-                                                    this.setState({ registerEmail: e.target.value });
-                                                    if (emailValidation(e.target.value)) {
-                                                        this.setState({ registerEmailState: true });
+                                                    this.setState({ oldPwd: e.target.value });
+                                                    if (minLength(e.target.value, 1)) {
+                                                        this.setState({ oldPwdState: true });
                                                     } else {
-                                                        this.setState({ registerEmailState: false });
+                                                        this.setState({ oldPwdState: false });
                                                     }
                                                 }}
                                             ></Form.Control>
-                                            {this.state.registerEmailState ? null : (
-                                                <label className="error">This field is required.</label>
+                                            {this.state.oldPwdState ? null : (
+                                                <label className="error">必填区域</label>
                                             )}
                                         </Form.Group>
                                         <Form.Group
                                             className={
                                                 "has-label " +
-                                                (this.state.registerPasswordState ? "has-success" : "has-error")
+                                                (this.state.newPwdState ? "has-success" : "has-error")
                                             }
                                         >
                                             <label>
-                                                密码 <span className="star">*</span>
+                                                新密码 <span className="star">*</span>
                                             </label>
                                             <Form.Control
-                                                id="registerPassword"
+                                                id="newPwd"
                                                 name="password"
                                                 type="password"
-                                                value={this.state.registerPassword}
+                                                value={this.state.newPwd}
                                                 onChange={(e) => {
-                                                    this.setState({ registerPassword: e.target.value });
+                                                    this.setState({ newPwd: e.target.value });
                                                     if (minLength(e.target.value, 1)) {
-                                                        this.setState({ registerPasswordState: true });
+                                                        this.setState({ newPwdState: true });
                                                     } else {
-                                                        this.setState({ registerPasswordState: false });
+                                                        this.setState({ newPwdState: false });
                                                     }
                                                 }}
                                             ></Form.Control>
-                                            {this.state.registerPassword ? null : (
-                                                <label className="error">This field is required.</label>
+                                            {this.state.newPwdState ? null : (
+                                                <label className="error">必填区域</label>
                                             )}
                                         </Form.Group>
                                         <Form.Group
                                             className={
                                                 "has-label " +
-                                                (this.state.registerConfirmPasswordState
+                                                (this.state.confirmPwdState
                                                     ? "has-success"
                                                     : "has-error")
                                             }
                                         >
                                             <label>
-                                                确认密码 <span className="star">*</span>
+                                                确认新密码 <span className="star">*</span>
                                             </label>
                                             <Form.Control
-                                                equalto="#registerPassword"
-                                                id="registerPasswordConfirmation"
+                                                equalto="#newPwd"
+                                                id="confirmPwd"
                                                 name="password_confirmation"
                                                 type="password"
-                                                value={this.state.registerConfirmPassword}
+                                                value={this.state.confirmPwd}
                                                 onChange={(e) => {
-                                                    this.setState({ registerConfirmPassword: e.target.value });
-                                                    if (equalTo(e.target.value, this.state.registerPassword)) {
-                                                        this.setState({ registerConfirmPasswordState: true });
+                                                    this.setState({ confirmPwd: e.target.value });
+                                                    if (equalTo(e.target.value, this.state.newPwd)) {
+                                                        this.setState({ confirmPwdState: true });
                                                     } else {
-                                                        this.setState({ registerConfirmPasswordState: false });
+                                                        this.setState({ confirmPwdState: false });
                                                     }
                                                 }}
                                             ></Form.Control>
-                                            {this.state.registerConfirmPassword ? null : (
+                                            {this.state.confirmPwdState ? null : (
                                                 <label className="error">
-                                                    This field is required and needs to be equal with the
-                                                    one above.
+                                                    这里需要和新密码一致
                                                 </label>
                                             )}
                                         </Form.Group>
@@ -212,35 +223,35 @@ class EditUser extends React.Component {
                                             onClick={
                                                 () => {
                                                     if (
-                                                        !this.state.registerEmailState ||
-                                                        !emailValidation(this.state.registerEmail)
+                                                        !this.state.oldPwdState ||
+                                                        !minLength(this.state.oldPwd,1)
                                                     ) {
-                                                        this.setState({ registerEmailState: false });
+                                                        this.setState({ oldPwdState: false });
                                                     } else {
-                                                        this.setState({ registerEmailState: true });
+                                                        this.setState({ oldPwdState: true });
                                                     }
                                                     if (
-                                                        !this.state.registerPasswordState ||
-                                                        !minLength(this.state.registerPassword, 1)
+                                                        !this.state.newPwdState ||
+                                                        !minLength(this.state.newPwd, 1)
                                                     ) {
-                                                        this.setState({ registerPasswordState: false });
+                                                        this.setState({newPwdState: false });
                                                     } else {
-                                                        this.setState({ registerPasswordState: true });
+                                                        this.setState({newPwdState: true });
                                                     }
                                                     if (
-                                                        !this.state.registerConfirmPasswordState ||
-                                                        !minLength(this.state.registerConfirmPassword, 1) ||
-                                                        !equalTo(this.state.registerConfirmPassword, this.state.registerPassword)
+                                                        !this.state.confirmPwdState ||
+                                                        !minLength(this.state.confirmPwd, 1) ||
+                                                        !equalTo(this.state.confirmPwd, this.state.newPwd)
                                                     ) {
-                                                        this.setState({ registerConfirmPasswordState: false });
+                                                        this.setState({ confirmPwdState: false });
                                                     } else {
-                                                        this.setState({ registerConfirmPasswordState: true });
+                                                        this.setState({ confirmPwdState: true });
                                                     }
 
                                                 }
                                             }
                                         >
-                                            添加新用户
+                                            修改密码
                   </Button>
                                         <div className="clearfix"></div>
                                     </Card.Footer>

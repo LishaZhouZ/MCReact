@@ -117,8 +117,8 @@ class UserManage extends React.Component {
   }
 
 
-  handleDetailButtonClick() {
-
+  handleDetailButtonClick(id, username) {
+    this.props.history.push('/admin/user-manage/edit-user/'+id+"/"+username);
   }
   render() {
     return (
@@ -188,7 +188,7 @@ class UserManage extends React.Component {
                       {this.state.users.map(user => (
                         <tr key={user.id}>
                           <UserList user={user}
-                            checkButtonClick={() => this.handleDetailButtonClick(user.id)}
+                            checkButtonClick={() => this.handleDetailButtonClick(user.id, user.username)}
                             deleteButtonClick={() => this.displayWarningWithConfirmMessageAlert(user.id)} />
                         </tr>
                       ))}

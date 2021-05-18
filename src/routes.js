@@ -138,7 +138,7 @@ var routes = [
         path:"/user-manage/edit-user",
         layout:"/admin",
         name:"修改用户",
-        params:"/:id?",
+        params:"/:id?/:email?",
         mini:"",
         component: EditUser,
         invisible: true
