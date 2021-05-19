@@ -16,11 +16,8 @@ import {
   Tab,
   Nav,
 } from "react-bootstrap";
-const addressValidation = (value) =>
-    /user-manage\/isSupplier/.test(
-        value
-    );
-class UserManage extends React.Component {
+
+class UserManageAdmin extends React.Component {
   constructor(props) {
     super(props);
     this.handleCreateButtonClick = this.handleCreateButtonClick.bind(this);
@@ -34,7 +31,6 @@ class UserManage extends React.Component {
       errMsg: "",
       users: [],
       alert: null,
-      isSupplier: addressValidation(this.props.location.pathname)
     }
     console.log(this.state.isSupplier)
   }
@@ -65,14 +61,8 @@ class UserManage extends React.Component {
 
 
   componentDidMount() {
-    var url=''
+    var url='https://test.mchoicetravel.com:8080/boss/admins'
     //make a call to rest api
-    if (!this.state.isSupplier){
-     url = 'https://test.mchoicetravel.com:8080/boss/admins'
-     } 
-     else{
-       url = 'https://test.mchoicetravel.com:8080/boss/suppliers'
-     }
     fetch(url)
       .then(res => res.json())
       .then(res => {
@@ -87,21 +77,14 @@ class UserManage extends React.Component {
   }
 
   handleCreateButtonClick() {
-    var data = {isSupplier: this.state.isSupplier}
     var path = {
-      pathname:'/admin/user-manage/new-user',
-      state:data,
+      pathname:'/admin/user-manage/new-user-admin',
     }
     this.props.history.push(path);
   }
   handleDeleteUser(id) {
-    var url=''
-    if (!this.state.isSupplier){
-     url = 'https://test.mchoicetravel.com:8080/boss/admin/' + id
-     } 
-     else{
-       url = 'https://test.mchoicetravel.com:8080/boss/supplier'+id
-     }
+    var url = 'https://test.mchoicetravel.com:8080/boss/admin/' + id
+
     axios.delete(url)
       .then((res) => {
         if(res.data.errCode==0){
@@ -142,9 +125,9 @@ class UserManage extends React.Component {
 
 
   handleDetailButtonClick(id, username) {
-    var data = {id:id, username: username, isSupplier: this.state.isSupplier}
+    var data = {id:id, username: username}
     var path = {
-      pathname:'/admin/user-manage/edit-user',
+      pathname:'/admin/user-manage/edit-user-admin',
       state:data,
     }
     this.props.history.push(path);
@@ -261,4 +244,4 @@ function UserList(props) {
       </td>
     </>);
 }
-export default UserManage;
+export default UserManageAdmin;

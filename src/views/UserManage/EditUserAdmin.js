@@ -20,7 +20,7 @@ import {
 const equalTo = (value1, value2) => value1 === value2;
 const minLength = (value, length) => value.length >= length;
 
-class EditUser extends React.Component {
+class EditUserAdmin extends React.Component {
     constructor(props) {
         super(props);
 
@@ -29,8 +29,8 @@ class EditUser extends React.Component {
         this.hideAlert = this.hideAlert.bind(this);
 
         this.state = {
-            id:this.props.match.params.id,
-            email: this.props.match.params.email,
+            id:this.props.location.state.id,
+            email: this.props.location.state.username,
             oldPwd:"",
             oldPwdState:true,
             newPwd: "",
@@ -267,4 +267,4 @@ class EditUser extends React.Component {
     };
 }
 
-export default EditUser;
+export default EditUserAdmin;

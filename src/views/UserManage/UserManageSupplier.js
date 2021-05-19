@@ -16,11 +16,8 @@ import {
   Tab,
   Nav,
 } from "react-bootstrap";
-const addressValidation = (value) =>
-    /user-manage\/isSupplier/.test(
-        value
-    );
-class UserManage extends React.Component {
+
+class UserManageSupplier extends React.Component {
   constructor(props) {
     super(props);
     this.handleCreateButtonClick = this.handleCreateButtonClick.bind(this);
@@ -34,7 +31,6 @@ class UserManage extends React.Component {
       errMsg: "",
       users: [],
       alert: null,
-      isSupplier: addressValidation(this.props.location.pathname)
     }
     console.log(this.state.isSupplier)
   }
@@ -65,14 +61,8 @@ class UserManage extends React.Component {
 
 
   componentDidMount() {
-    var url=''
+    var url='https://test.mchoicetravel.com:8080/boss/suppliers'
     //make a call to rest api
-    if (!this.state.isSupplier){
-     url = 'https://test.mchoicetravel.com:8080/boss/admins'
-     } 
-     else{
-       url = 'https://test.mchoicetravel.com:8080/boss/suppliers'
-     }
     fetch(url)
       .then(res => res.json())
       .then(res => {
@@ -87,21 +77,13 @@ class UserManage extends React.Component {
   }
 
   handleCreateButtonClick() {
-    var data = {isSupplier: this.state.isSupplier}
     var path = {
-      pathname:'/admin/user-manage/new-user',
-      state:data,
+      pathname:'/admin/user-manage/new-user-supplier',
     }
     this.props.history.push(path);
   }
   handleDeleteUser(id) {
-    var url=''
-    if (!this.state.isSupplier){
-     url = 'https://test.mchoicetravel.com:8080/boss/admin/' + id
-     } 
-     else{
-       url = 'https://test.mchoicetravel.com:8080/boss/supplier'+id
-     }
+    var url = 'https://test.mchoicetravel.com:8080/boss/supplier/'+id
     axios.delete(url)
       .then((res) => {
         if(res.data.errCode==0){
@@ -141,10 +123,10 @@ class UserManage extends React.Component {
   }
 
 
-  handleDetailButtonClick(id, username) {
-    var data = {id:id, username: username, isSupplier: this.state.isSupplier}
+  handleDetailButtonClick(id) {
+    var data = {id:id}
     var path = {
-      pathname:'/admin/user-manage/edit-user',
+      pathname:'/admin/user-manage/edit-user-supplier',
       state:data,
     }
     this.props.history.push(path);
@@ -206,8 +188,8 @@ class UserManage extends React.Component {
                   <Table className="table-hover table-striped">
                     <thead>
                       <tr>
-                        <th className="border-0">用户编号</th>
-                        <th className="border-0">用户名</th>
+                        <th className="border-0">供应商ID</th>
+                        <th className="border-0">供应商名称</th>
                         <th className="border-0">创建时间</th>
                         <th className="border-0">操作选项</th>
                       </tr>
@@ -217,7 +199,7 @@ class UserManage extends React.Component {
                       {this.state.users.map(user => (
                         <tr key={user.id}>
                           <UserList user={user}
-                            checkButtonClick={() => this.handleDetailButtonClick(user.id, user.username)}
+                            checkButtonClick={() => this.handleDetailButtonClick(user.id)}
                             deleteButtonClick={() => this.displayWarningWithConfirmMessageAlert(user.id)} />
                         </tr>
                       ))}
@@ -240,7 +222,7 @@ function UserList(props) {
   return (
     <>
       <td>{props.user.id}</td>
-      <td>{props.user.username}</td>
+      <td>{props.user.name}</td>
       <td>{props.user.createTime}</td>
 
       <td className="td-actions text-left">
@@ -261,4 +243,4 @@ function UserList(props) {
       </td>
     </>);
 }
-export default UserManage;
+export default UserManageSupplier;

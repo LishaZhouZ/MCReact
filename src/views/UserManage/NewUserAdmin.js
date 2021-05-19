@@ -37,7 +37,7 @@ const urlValidation = (value) => {
 const equalTo = (value1, value2) => value1 === value2;
 const minLength = (value, length) => value.length >= length;
 
-class NewUser extends React.Component {
+class NewUserAdmin extends React.Component {
     constructor(props) {
         super(props);
         this.handleRegisterNewUser = this.handleRegisterNewUser.bind(this);
@@ -96,11 +96,13 @@ class NewUser extends React.Component {
 
     handleRegisterNewUser(e) {
         e.preventDefault();
-        axios.post('https://test.mchoicetravel.com:8080/boss/admin',
-            {
-                username: this.state.registerEmail,
-                pwd: this.state.registerPassword
-            }
+        var url='https://test.mchoicetravel.com:8080/boss/admin/'
+        var data={
+            username: this.state.registerEmail,
+            pwd: this.state.registerPassword
+        }
+
+        axios.post(url,data   
         ).then((response) => {
             console.log(response)
             this.setState({
@@ -271,4 +273,4 @@ class NewUser extends React.Component {
     };
 }
 
-export default NewUser;
+export default NewUserAdmin;
