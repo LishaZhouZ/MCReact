@@ -36,7 +36,6 @@ class UserManage extends React.Component {
       alert: null,
       isSupplier: addressValidation(this.props.location.pathname)
     }
-    console.log(this.state.isSupplier)
   }
   hideAlert() {
     this.setState({ alert: null });

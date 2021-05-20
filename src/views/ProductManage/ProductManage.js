@@ -24,20 +24,7 @@ class ProductManage extends React.Component{
       product: []};
   }
   componentDidMount(){
-        //make a call to rest api
-    axios.get('https://test.mchoicetravel.com:8080/boss/login',
-    {
-      "username":""
-    }
-    )
-    .then((res) => {
-          console.log(res)
-          this.setState({ 
-            errCode: res.data.errCode,
-            errMsg: res.data.errMsg,
-            product: res.data.data })
-        })
-        .catch(console.log)
+    //make a call to rest api
     //make a call to rest api
     axios.get('https://test.mchoicetravel.com:8080/boss/oneday/products/0?')
     .then((res) => {

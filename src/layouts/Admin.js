@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route} from "react-router-dom";
 // react-bootstrap components
 import {
   Badge,
@@ -29,14 +29,23 @@ import image1 from "assets/img/full-screen-image-1.jpg";
 import image2 from "assets/img/full-screen-image-2.jpg";
 import image3 from "assets/img/full-screen-image-3.jpg";
 import image4 from "assets/img/full-screen-image-4.jpg";
+import { extend } from "chartist";
 
-function Admin() {
-  const [sidebarImage, setSidebarImage] = React.useState(image3);
-  const [sidebarBackground, setSidebarBackground] = React.useState("black");
-  const getRoutes = (routes) => {
+
+class Admin extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      location: this.props.location,
+      sidebarImage: image3,
+      sidebarBackground: "black",
+    }
+  }
+
+  getRoutes(routes){
     return routes.map((prop, key) => {
       if (prop.collapse) {
-        return getRoutes(prop.views);
+        return this.getRoutes(prop.views);
       }
       if (prop.layout === "/admin") {
         return (
@@ -51,45 +60,49 @@ function Admin() {
       }
     });
   };
-  return (
-    <>
-      <div className="wrapper">
-        <Sidebar
-          routes={routes}
-          image={sidebarImage}
-          background={sidebarBackground}
-        />
-        <div className="main-panel">
-          <AdminNavbar />
-          <div className="content">
-            <Switch>{getRoutes(routes)}</Switch>
-          </div>
-          <AdminFooter />
-          <div
-            className="close-layer"
-            onClick={() =>
-              document.documentElement.classList.toggle("nav-open")
-            }
+
+  render() {
+    return (
+      <>
+        <div className="wrapper">
+          <Sidebar
+            routes={routes}
+            image={this.state.sidebarImage}
+            background={this.state.sidebarBackground}
+            location = {this.state.location}
           />
+          <div className="main-panel">
+            <AdminNavbar />
+            <div className="content">
+              <Switch>{this.getRoutes(routes)}</Switch>
+            </div>
+            <AdminFooter />
+            <div
+              className="close-layer"
+              onClick={() =>
+                document.documentElement.classList.toggle("nav-open")
+              }
+            />
+          </div>
         </div>
-      </div>
-      <FixedPlugin
-        setSidebarImageParent={(value) => setSidebarImage(value)}
-        sidebarDefaultImage={sidebarImage}
-        sidebarImages={[image1, image2, image3, image4]}
-        backgroundColors={[
-          "black",
-          "azure",
-          "green",
-          "orange",
-          "red",
-          "purple",
-        ]}
-        backgroundColor={sidebarBackground}
-        setSidebarBackgroundParent={(value) => setSidebarBackground(value)}
-      />
-    </>
-  );
+        <FixedPlugin
+          setSidebarImageParent={(value) => this.setState({ sidebarImage: value })}
+          sidebarDefaultImage={this.state.sidebarImage}
+          sidebarImages={[image1, image2, image3, image4]}
+          backgroundColors={[
+            "black",
+            "azure",
+            "green",
+            "orange",
+            "red",
+            "purple",
+          ]}
+          backgroundColor={this.state.sidebarBackground}
+          setSidebarBackgroundParent={(value) => setState({ sidebarBackground: value })}
+        />
+      </>
+    );
+  };
 }
 
 export default Admin;

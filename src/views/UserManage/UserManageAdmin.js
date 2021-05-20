@@ -32,7 +32,6 @@ class UserManageAdmin extends React.Component {
       users: [],
       alert: null,
     }
-    console.log(this.state.isSupplier)
   }
   hideAlert() {
     this.setState({ alert: null });

@@ -58,13 +58,29 @@ var routes = [
     icon: "nc-icon nc-chart-pie-35",
     component: Dashboard,
     params:"",
+    roleAdmin:1,
+    roleSupplier:0,
   },
+  {
+    path: "/login",
+    layout: "/auth",
+    name: "Login",
+    icon: "nc-icon nc-chart-pie-35",
+    component: LoginPage,
+    params:"",
+    invisible: true,
+    roleAdmin:1,
+    roleSupplier:1,
+  },
+
   {
     collapse: true,
     path:"/product-manage",
     name:"商品管理",
     state:"openProductManage",
     icon: "nc-icon nc-bag",
+    roleAdmin: 1,
+    roleSupplier: 1,
     views:[
       {
         path:"/product-manage/oneday",
@@ -92,6 +108,8 @@ var routes = [
     name:"订单管理",
     state:"openOrderManage",
     icon: "nc-icon nc-single-copy-04",
+    roleAdmin:1,
+    roleSupplier:1,
     views:[
       {
         path:"/order-manage/oneday",
@@ -111,7 +129,8 @@ var routes = [
     state:"openUserManage",
     icon: "nc-icon nc-circle-09",
     params:"",
-
+    roleAdmin:1,
+    roleSupplier:0,
     views:[
       {
         path:"/user-manage/isAdmins",

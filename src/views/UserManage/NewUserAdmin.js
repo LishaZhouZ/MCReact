@@ -89,8 +89,6 @@ class NewUserAdmin extends React.Component {
                         {errMsg}
                     </SweetAlert>
             });
-            console.log("调用了alert方法")
-
         }
     };
 

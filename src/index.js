@@ -13,6 +13,8 @@
 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
+Extended by
+@author:LishaZhouZ(a1995768696.brave@gmail.com)
 */
 import React from "react";
 import ReactDOM from "react-dom";
@@ -31,7 +33,7 @@ ReactDOM.render(
     <Switch>
       <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
       <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
-      <Redirect from="/" to="/admin/dashboard" />
+      <Redirect from="/" to="/auth/login" />
     </Switch>
   </BrowserRouter>,
   document.getElementById("root")

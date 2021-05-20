@@ -111,7 +111,7 @@ class OrderManage extends React.Component {
                   </thead>
                   <tbody>
                     {this.state.order.map(order => (
-                      <tr key={order.id}>
+                      <tr key={order.orderNo}>
                         <OrderList order={order} />
                       </tr>
                     ))}
