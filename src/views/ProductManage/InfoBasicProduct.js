@@ -26,9 +26,8 @@ import {
 } from "react-bootstrap";
 import Select from "react-select";
 import TagsInput from "components/TagsInput/TagsInput.js";
-import ImagesUploader from "react-images-uploader";
-import "react-images-uploader/styles.css";
-import "react-images-uploader/font.css";
+import ImageUploader from "react-images-upload";
+//important for getting nice style.
 import image1 from "assets/img/full-screen-image-1.jpg";
 class InfoBasicProduct extends React.Component {
     constructor(props) {
@@ -36,12 +35,12 @@ class InfoBasicProduct extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.displayAlert = this.displayAlert.bind(this);
         this.hideAlert = this.hideAlert.bind(this);
-
+        this.onDrop = this.onDrop.bind(this);
         this.state = {
 
             errCode: 0,
             errMsg: "",
-            alert:null,
+            alert: null,
             id: props.id ? props.id : -1,
 
             countryOptions: [],
@@ -57,7 +56,7 @@ class InfoBasicProduct extends React.Component {
                 { value: "0", label: "包车游" },
                 { value: "1", label: "拼车游" }
             ],
-            selectedType: {},
+            selectedType: { value: "0", label: "包车游" },
 
 
             priceTypeList: [
@@ -70,18 +69,18 @@ class InfoBasicProduct extends React.Component {
                 { value: "0", label: "不包含" },
                 { value: "1", label: "包含" }
             ],
-            selectedLunch: {},
+            selectedLunch: { value: "0", label: "不包含" },
 
             bookTomorrowType: [
                 { value: "0", label: "否" },
                 { value: "1", label: "是" }
             ],
-            selectedBookTomorrow: {},
+            selectedBookTomorrow:{ value: "1", label: "是" },
 
             collectionWayType: [
                 { value: "1", label: "上门接送" }
             ],
-            selectedCollectionWay: {},
+            selectedCollectionWay: { value: "1", label: "上门接送" },
 
 
             cityId: "1",
@@ -103,49 +102,48 @@ class InfoBasicProduct extends React.Component {
             bookTomorrow: "1",
             collectionWay: "1",
             //video:"",
-            images: image1
+            images: [],
+            video:[]
         }
     };
 
     handleSubmit(e) {
         e.preventDefault();
-        console.log(this.state.price)
+
+        let formData = new FormData();
+        formData.set("cityId", this.state.cityId)
+        formData.set("departure", this.state.departure)
+        formData.set("type", this.state.type)
+        formData.set("price", this.state.price)
+        formData.set("priceType", this.state.priceType)
+        formData.set("title", this.state.title)
+        formData.set("remark", this.state.remark)
+        formData.set("feature1", this.state.feature1)
+        formData.set("feature2", this.state.feature2)
+        formData.set("feature3", this.state.feature3)
+        formData.set("feature4", this.state.feature4)
+        formData.set("startTime", this.state.startTime)
+        formData.set("endTime", this.state.endTime)
+        formData.set("places", this.state.places)
+        formData.set("placesDuration", this.state.placesDuration)
+        formData.set("lunch", this.state.lunch)
+        formData.set("bookTomorrow", this.state.bookTomorrow)
+        formData.set("collectionWay", this.state.collectionWay)
+        formData.append('images', this.state.images[0])
+        //formData.append('video', this.state.video)
+
+        //formData.append("video", this.state.images)
+        console.log(formData.get("images"))
+        console.log(this.state.images)
         axios.post("https://test.mchoicetravel.com:8080/boss/oneday/product",
-            {
-                cityId: this.state.cityId,
-                departure: this.state.departure,
-                type: this.state.type,
-                price: this.state.price,
-                priceType: this.state.priceType,
-                title: this.state.title,
-                remark: this.state.remark,
-                feature1: this.state.feature1,
-                feature2: this.state.feature2,
-                feature3: this.state.feature3,
-                feature4: this.state.feature4,
-                startTime: this.state.startTime,
-                endTime: this.state.endTime,
-                places: this.state.places,
-                placesDuration: this.state.placesDuration,
-                lunch: this.state.lunch,
-                bookTomorrow: this.state.bookTomorrow,
-                collectionWay: this.state.collectionWay,
-                video: this.state.video,
-                images: this.state.images,
-            },
+            formData,
             {
                 headers: {
-                    "token": localStorage.getItem("id_token")
+                    "token": localStorage.getItem("id_token"),
                 }
             }
-            //{   
-            //     headers: {
-            //     randChar:randStr32,
-            //     timestamp: timestamp,
-            //     sign:afterencry
-            //     }}
         )
-        .then((response) => {
+            .then((response) => {
                 console.log(response)
                 this.setState({
                     errCode: response.data.errCode,
@@ -193,34 +191,39 @@ class InfoBasicProduct extends React.Component {
             });
         }
     };
-
+    onDrop(pictureFiles, pictureDataURLs) {
+        this.setState({
+          images: pictureFiles
+        });
+      }
     componentDidMount() {
         axios.get("https://test.mchoicetravel.com:8080/boss/cities")
             .then((res) => {
                 let countryOptionsTemp = [];
                 res.data.data.cities.map(
                     (prop) => {
-                        console.log(prop);
                         countryOptionsTemp.push({ "value": prop.id, "label": prop.country + prop.name })
+
                     }
                 )
                 this.setState({ countryOptions: countryOptionsTemp })
             })
     }
+
     componentDidUpdate() {
         console.log(this.state)
     }
     render() {
         return (
             <>
-                {this.state.alert}
-                <Card>
+                { this.state.alert}
+                < Card >
                     <Card.Header>
                         <Card.Title as="h4">基本信息</Card.Title>
                         <p className="card-category">商品编号：{this.state.id}</p>
                     </Card.Header>
                     <Card.Body>
-                        <Form onSubmit={this.handleSubmit}>
+                        <Form id='formForCreate' onSubmit={this.handleSubmit} >
                             <Row>
                                 <Col className="pr-1" md="4">
                                     <Form.Group>
@@ -446,17 +449,16 @@ class InfoBasicProduct extends React.Component {
                             </Row>
 
                             <Row>
-                                <Col md="12">
+                                <Col md="4">
                                     <Form.Group>
                                         <label>商品图片</label>
-                                        <ImagesUploader
-                                            url="http://localhost:9090/multiple"
-                                            optimisticPreviews
-                                            onLoadEnd={(err) => {
-                                                if (err) {
-                                                    console.error(err);
-                                                }
-                                            }}
+                                        <ImageUploader
+                                            withIcon={true}
+                                            buttonText="Choose images"
+                                            onChange={this.onDrop}
+                                            imgExtension={[".jpg", ".gif", ".png", ".gif"]}
+                                            maxFileSize={5242880}
+                                            withPreview={true}
                                         />
                                     </Form.Group>
                                 </Col>
@@ -471,7 +473,7 @@ class InfoBasicProduct extends React.Component {
                             <div className="clearfix"></div>
                         </Form>
                     </Card.Body>
-                </Card>
+                </Card >
             </>
         )
     }

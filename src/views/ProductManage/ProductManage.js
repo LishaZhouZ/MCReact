@@ -13,12 +13,15 @@ import {
   OverlayTrigger,
   Tooltip,
 } from "react-bootstrap";
-
+import SweetAlert from "react-bootstrap-sweetalert";
 class ProductManage extends React.Component{
 
   constructor(props) {
     super(props);
+    this.hideAlert=this.hideAlert.bind(this);
+    this.displayWarningWithConfirmMessageAlert=this.displayWarningWithConfirmMessageAlert.bind(this);
     this.state = {
+      alert: null,
       errCode:0,
       errMsg:"",
       product: []};
@@ -45,13 +48,75 @@ class ProductManage extends React.Component{
 }
   /** */
   handleDeleteButtonClick=(id)=>{
-    //update state to delete the thing. (push request may need)
-    alert('Do you want to delete this product?');
-    console.log(id)
+    var url = 'https://test.mchoicetravel.com:8080/boss/oneday/product/' + id
+    axios.delete(url)
+    .then((res) => {
+      if(res.data.errCode==0){
+      this.setState({
+        alert:
+          <SweetAlert
+            success
+            style={{ display: "block", marginTop: "-100px" }}
+            title="商品已被删除"
+            onConfirm={() => this.hideAlert()}
+            onCancel={() => this.hideAlert()}
+            confirmBtnBsStyle="info"
+          >
+            商品{id}已被删除
+      </SweetAlert>
+      });
+    }
+    else{
+      this.setState({
+        alert:
+          <SweetAlert
+            danger
+            style={{ display: "block", marginTop: "-100px" }}
+            title="发生错误"
+            onConfirm={() => this.hideAlert()}
+            onCancel={() => this.hideAlert()}
+            confirmBtnBsStyle="info"
+          >
+            发生错误"{res.data.errMsg}"
+      </SweetAlert>
+      });
+    }
+    })
+    .catch((e) => {
+      console.log(e)
+    })
   }
+
+
+
+  hideAlert() {
+    this.setState({ alert: null });
+  };
+
+
+  displayWarningWithConfirmMessageAlert(id) {
+    this.setState({
+      alert:
+        <SweetAlert
+          warning
+          style={{ display: "block", marginTop: "-100px" }}
+          title="确认删除？"
+          onConfirm={() => this.handleDeleteButtonClick(id)}
+          onCancel={() => this.hideAlert()}
+          confirmBtnBsStyle="info"
+          cancelBtnBsStyle="danger"
+          confirmBtnText="确认删除"
+          cancelBtnText="取消"
+          showCancel
+        >
+          确认删除商品{id}?      
+        </SweetAlert>
+    });
+  };
   render(){
   return (
     <>
+    {this.state.alert}
     <Container fluid>
     <Row>
           <Col>
@@ -192,7 +257,7 @@ class ProductManage extends React.Component{
                     <tr key={product.id}>
                       <ProductList product={product} 
                       checkButtonClick = {()=>this.handleDetailButtonClick(product.id)} 
-                      deleteButtonClick={()=>this.handleDeleteButtonClick(product.id)}/>
+                      deleteButtonClick={()=>this.displayWarningWithConfirmMessageAlert(product.id)}/>
                     </tr>
                   ))}
                   

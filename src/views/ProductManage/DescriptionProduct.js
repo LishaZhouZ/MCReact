@@ -13,11 +13,14 @@ import {
     Tab,
     Nav,
     Tabs,
-
+    FormGroup, 
+    FormControl
 
 } from "react-bootstrap";
+const axios = require('axios').default;
 import Select from "react-select";
 import ReactDatetime from "react-datetime";
+import SweetAlert from "react-bootstrap-sweetalert";
 class DescriptionProduct extends React.Component {
     constructor(props) {
         super(props);
@@ -58,11 +61,7 @@ class DescriptionProduct extends React.Component {
                                 <Tab.Content>
                                     <Tab.Pane eventKey="info-plain">
                                         <br></br>
-                                        <Row>
-                                            <Form.Group>
-                                                <Form.Control type="text" placeholder="Input"></Form.Control>
-                                            </Form.Group>
-                                        </Row>
+                                        <InfoPlain id ={this.state.id}/>
                                     </Tab.Pane>
                                     <Tab.Pane eventKey="description-plain">
                                         <br></br>
@@ -82,6 +81,94 @@ class DescriptionProduct extends React.Component {
     }
 }
 
+class InfoPlain extends React.Component {
+    constructor(props) {
+        super(props);
+        this.submitIntroduction=this.submitIntroduction.bind(this);
+        this.state = {
+            viewIntroduction: "",
+            alert:null,
+            id: props.id
+        };
+    }
+    submitIntroduction(e){
+        e.preventDefault();
+        let formData = new FormData();
+        formData.set("viewIntroduction", this.state.viewIntroduction);
+        let id = this.state.id;
+        var url='https://test.mchoicetravel.com:8080/boss/oneday/product/'+ id +'/view-introductions';
+        
+        axios.post(url,formData)
+        .then((response) => {
+            console.log(response)
+            this.setState({
+                errCode: response.data.errCode,
+                errMsg: response.data.errMsg,
+            })
+            this.displayAlert(response.data.errCode, response.data.errMsg,id)
+        })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    hideAlert() {
+        this.setState({ alert: null });
+    };
+    displayAlert(errCode,errMsg,id) {
+        if (errCode == 0) {
+            this.setState({
+                alert:
+                    <SweetAlert
+                        success
+                        style={{ display: "block", marginTop: "-100px" }}
+                        title="提交成功"
+                        onConfirm={() => this.hideAlert()}
+                        onCancel={() => this.hideAlert()}
+                        confirmBtnBsStyle="info"
+                    >
+                        商品{id}描述已提交成功!
+          </SweetAlert>
+            });
+        }
+        else {
+            this.setState({
+                alert:
+                    <SweetAlert
+                        style={{ display: "block", marginTop: "-100px" }}
+                        title="提交失败"
+                        onConfirm={() => this.hideAlert()}
+                        onCancel={() => this.hideAlert()}
+                        confirmBtnBsStyle="info"
+                    >
+                        {errMsg}
+                    </SweetAlert>
+            });
+        }
+    };
+
+    render() {
+        return (
+            <>
+                {this.state.alert}
+                <Form onSubmit={this.submitIntroduction}>
+                <FormGroup controlId="formControlsTextarea" >
+                    <Form.Label>请输入景点描述</Form.Label>
+                    <FormControl as="textarea" row="10" />
+                </FormGroup>
+                <Button
+                        className="btn-fill pull-right"
+                        type="submit"
+                        variant="info"
+                    >
+                        保存
+                    </Button>
+                    <div className="clearfix"></div>
+                </Form>
+            </>
+        )
+    }
+}
 //description 2nd-Tab
 class DescriptionPlain extends React.Component {
     constructor(props) {
@@ -150,7 +237,7 @@ class DescriptionPlain extends React.Component {
                     <Row>
                         <Col md="2">
                             <Form.Group>
-                            <label>集合时间/上门时间</label>
+                                <label>集合时间/上门时间</label>
                                 <ReactDatetime
                                     dateFormat={false}
                                     inputProps={{
@@ -160,17 +247,17 @@ class DescriptionPlain extends React.Component {
                                 ></ReactDatetime>
                             </Form.Group>
                         </Col>
-                        
+
                         <Col md="2">
-                        
-                        <Form.Group>
-                        <label>前往</label>
-                        <Form.Control
-                                defaultValue=""
-                                placeholder=""
-                                type="text"
-                            ></Form.Control>
-                        </Form.Group>
+
+                            <Form.Group>
+                                <label>前往</label>
+                                <Form.Control
+                                    defaultValue=""
+                                    placeholder=""
+                                    type="text"
+                                ></Form.Control>
+                            </Form.Group>
                         </Col>
                     </Row>
                     <Row>
@@ -185,11 +272,11 @@ class DescriptionPlain extends React.Component {
                             </Form.Group>
                         </Col>
                     </Row>
-                    
+
                     <Row>
                         <Col md="2">
                             <Form.Group>
-                            <label>结束时间</label>
+                                <label>结束时间</label>
                                 <ReactDatetime
                                     dateFormat={false}
                                     inputProps={{
@@ -199,17 +286,17 @@ class DescriptionPlain extends React.Component {
                                 ></ReactDatetime>
                             </Form.Group>
                         </Col>
-                        
+
                         <Col md="2">
-                        
-                        <Form.Group>
-                        <label>前往</label>
-                        <Form.Control
-                                defaultValue=""
-                                placeholder=""
-                                type="text"
-                            ></Form.Control>
-                        </Form.Group>
+
+                            <Form.Group>
+                                <label>前往</label>
+                                <Form.Control
+                                    defaultValue=""
+                                    placeholder=""
+                                    type="text"
+                                ></Form.Control>
+                            </Form.Group>
                         </Col>
                     </Row>
                     <Button

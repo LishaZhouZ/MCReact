@@ -20,29 +20,45 @@ class OrderManage extends React.Component {
 
   constructor(props) {
     super(props);
+    this.handlePageChange=this.handlePageChange.bind(this);
     this.state = {
       errCode:0,
       errMsg:"",
       activePage: 1,
-      order: []
+      orders: [],
+      pageCount:5,
+      totalSum:0
     };
   }
 
   handlePageChange(pageNumber) {
     console.log(`active page is ${pageNumber}`);
     this.setState({ activePage: pageNumber });
-  }
-
-  componentDidMount() {
-    //make a call to rest api
-    fetch('https://test.mchoicetravel.com:8080/boss/oneday/orders/0?page=1&pageCount=20')
+    fetch('https://test.mchoicetravel.com:8080/boss/oneday/orders/0?page='+pageNumber+'&pageCount='+this.state.pageCount)
       .then(res => res.json())
       .then(res => {
         console.log(res)
         this.setState({ 
           errCode: res.errCode,
           errMsg: res.errMsg,
-          order: res.data })
+          orders: res.data.orders,
+          totalSum:res.data.totalCount
+         })
+      })
+      .catch(console.log)
+  }
+
+  componentDidMount() {
+    //make a call to rest api
+    fetch('https://test.mchoicetravel.com:8080/boss/oneday/orders/0?page=1&pageCount='+this.state.pageCount)
+      .then(res => res.json())
+      .then(res => {
+        console.log(res)
+        this.setState({ 
+          errCode: res.errCode,
+          errMsg: res.errMsg,
+          orders: res.data.orders,
+          totalSum:res.data.totalCount })
       })
       .catch(console.log)
   }
@@ -110,7 +126,7 @@ class OrderManage extends React.Component {
                     </tr>
                   </thead>
                   <tbody>
-                    {this.state.order.map(order => (
+                    {this.state.orders.map(order => (
                       <tr key={order.orderNo}>
                         <OrderList order={order} />
                       </tr>
@@ -119,10 +135,10 @@ class OrderManage extends React.Component {
                 </Table>
                 <Pagination
                   activePage={this.state.activePage}
-                  itemsCountPerPage={10}
-                  totalItemsCount={450}
+                  itemsCountPerPage={this.state.pageCount}
+                  totalItemsCount={this.state.totalSum}
                   pageRangeDisplayed={5}
-                  onChange={this.handlePageChange.bind(this)}
+                  onChange={this.handlePageChange}
                 />
               </Card.Body>
             </Card>
