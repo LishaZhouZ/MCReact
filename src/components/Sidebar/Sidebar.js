@@ -132,7 +132,7 @@ function Sidebar({ routes, image, background }) {
           <div className="logo">
             <a
               className="simple-text logo-mini"
-              href="http://www.creative-tim.com"
+              href=" "
             >
               <div className="logo-img">
                 <img
@@ -143,17 +143,17 @@ function Sidebar({ routes, image, background }) {
             </a>
             <a
               className="simple-text logo-normal"
-              href="http://www.creative-tim.com"
+              href=""
             >
-              Creative Tim
+              M'Choice
             </a>
           </div>
           <div className="user">
             <div className="photo">
-              <img
-                alt="..."
-                src={require("assets/img/default-avatar.png").default}
-              ></img>
+            <img
+                  src={require("assets/img/logo.svg").default}
+                  alt="react-logo"
+                />
             </div>
             <div className="info">
               <a
@@ -167,7 +167,7 @@ function Sidebar({ routes, image, background }) {
                 aria-expanded={userCollapseState}
               >
                 <span>
-                  Tania Andrew <b className="caret"></b>
+                  Dev Team <b className="caret"></b>
                 </span>
               </a>
               <Collapse id="collapseExample" in={userCollapseState}>

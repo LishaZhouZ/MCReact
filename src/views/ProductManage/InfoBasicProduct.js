@@ -150,7 +150,7 @@ class InfoBasicProduct extends React.Component {
                     errMsg: response.data.errMsg,
                     id: response.data.productId
                 })
-                this.displayAlert(response.data.errCode, response.data.errMsg, this.state.id)
+                this.displayAlert(response.data.errCode, response.data.errMsg, this.state.id);
             })
             .catch(function (error) {
                 console.log(error);

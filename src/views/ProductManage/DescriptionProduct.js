@@ -14,7 +14,10 @@ import {
     Nav,
     Tabs,
     FormGroup,
-    FormControl
+    FormControl,
+    ButtonGroup,
+    ToggleButton,
+    InputGroup
 
 } from "react-bootstrap";
 const axios = require('axios').default;
@@ -24,18 +27,26 @@ import SweetAlert from "react-bootstrap-sweetalert";
 class DescriptionProduct extends React.Component {
     constructor(props) {
         super(props);
+
+        if (this.props.id < 0) {
+            //alert and back to first
+        }
         this.state = {
+            alert: null,
 
             errCode: 1,
             errMsg: "",
             id: props.id,
 
-
         };
+
     }
+
+
     render() {
         return (
             <>
+                {this.state.alert}
                 <Card>
                     <Card.Header>
                         <Card.Title as="h4">商品描述</Card.Title>
@@ -65,12 +76,12 @@ class DescriptionProduct extends React.Component {
                                     </Tab.Pane>
                                     <Tab.Pane eventKey="description-plain">
                                         <br></br>
-                                        <DescriptionPlain />
+                                        <DescriptionPlain id={this.state.id} />
 
                                     </Tab.Pane>
                                     <Tab.Pane eventKey="notice-plain">
                                         <br></br>
-                                        <NoticePlain />
+                                        <NoticePlain id={this.state.id} />
                                     </Tab.Pane>
                                 </Tab.Content>
                             </Tab.Container>
@@ -104,8 +115,10 @@ class InfoPlain extends React.Component {
                 this.setState({
                     errCode: response.data.errCode,
                     errMsg: response.data.errMsg,
+                    viewIntroduction: ""
                 })
                 this.displayAlert(response.data.errCode, response.data.errMsg, id)
+
             })
             .catch(function (error) {
                 console.log(error);
@@ -154,7 +167,8 @@ class InfoPlain extends React.Component {
                 <Form onSubmit={this.submitIntroduction}>
                     <FormGroup controlId="formControlsTextarea" >
                         <Form.Label>请输入景点描述</Form.Label>
-                        <FormControl as="textarea" row="10" />
+                        <FormControl as="textarea" rows={10} value={this.state.viewIntroduction} onChange={(e) => this.setState({ viewIntroduction: e.target.value })} />
+
                     </FormGroup>
                     <Button
                         className="btn-fill pull-right"
@@ -175,402 +189,828 @@ class DescriptionPlain extends React.Component {
         super(props);
         this.submitOneJourneyDetail = this.submitOneJourneyDetail.bind(this);
         this.uploadJourneyDetail = this.uploadJourneyDetail.bind(this);
+        this.deleteJourneyByIndex = this.deleteJourneyByIndex.bind(this);
+        this.hideAlert = this.hideAlert.bind(this);
+        this.displayAlert = this.displayAlert.bind(this);
         this.state = {
-
+            alert: null,
             errCode: 1,
             errMsg: "",
             id: props.id,
+            radioValue: "",
+
+            radios: [
+                { name: '上门接', value: '1' },
+                { name: '交通', value: '2' }
+            ],
+
+            tempTime: "",
+            tempType: "",
+            tempSummary: "",
+            tempContent: "",
+            tempDuration: "",
+
+
+
             journeyDetails: [{
-                time: "",
-                type: "0",
-                summary: "",
-                content: "",
-                duration: ""
+                time: "08:30",
+                type: "上门接",
+                summary: "新加坡虽然地盘小，但各处都分布着各种寺庙、岛屿、博物馆和特色街区等等旅游热点",
+                content: "新加坡虽然地盘小，但各处都分布着各种寺庙、岛屿、博物馆和特色街区等等旅游热点，如果只能在新加坡待上几天，你肯定会觉得时间仓促， 因为这里实在有着太多不容错过的景点与活动。艺术爱好者可以徜徉于博物馆和画廊，享受慵懒的下午； 历史迷可以造访历史博物馆和文化遗产中心；狂欢派可以在陶醉在环球影城刺激的活动中；大自然爱好者可以沉浸在热带雨林和花园；全家人还可以在圣淘沙环岛畅游。还不心动么",
+                duration: "30分钟"
             }
             ]
         };
     }
+    hideAlert() {
+        this.setState({ alert: null });
+    };
+    displayAlert(errCode, errMsg, id) {
+        if (errCode == 0) {
+            this.setState({
+                alert:
+                    <SweetAlert
+                        success
+                        style={{ display: "block", marginTop: "-100px" }}
+                        title="提交成功"
+                        onConfirm={() => this.hideAlert()}
+                        onCancel={() => this.hideAlert()}
+                        confirmBtnBsStyle="info"
+                    >
+                        商品{id}行程已提交成功!
+          </SweetAlert>
+            });
+        }
+        else {
+            this.setState({
+                alert:
+                    <SweetAlert
+                        style={{ display: "block", marginTop: "-100px" }}
+                        title="提交失败"
+                        onConfirm={() => this.hideAlert()}
+                        onCancel={() => this.hideAlert()}
+                        confirmBtnBsStyle="info"
+                    >
+                        {errMsg}
+                    </SweetAlert>
+            });
+        }
+    };
     submitOneJourneyDetail(e) {
         e.preventDefault();
+        this.state.journeyDetails.push({
+            time: this.state.tempTime,
+            type: this.state.tempType,
+            summary: this.state.tempSummary,
+            content: this.state.tempContent,
+            duration: this.state.tempDuration
+        });
+        this.setState({
+            tempTime: "",
+            tempType: "",
+            tempSummary: "",
+            tempContent: "",
+            tempDuration: "",
+            radioValue: ""
+        })
+        console.log(this.state.journeyDetails)
+    };
 
-
-    }
     uploadJourneyDetail(e) {
         e.preventDefault();
+        let id = this.state.id;
+        var url = 'https://test.mchoicetravel.com:8080/boss/oneday/product/' + this.state.id + '/journey-details';
+        let data = { journeyDetails: this.state.journeyDetails }
+        console.log(this.state.id)
+        axios.post(url, data)
+            .then((response) => {
+                console.log(response)
+                this.setState({
+                    errCode: response.data.errCode,
+                    errMsg: response.data.errMsg,
+                })
+                this.displayAlert(response.data.errCode, response.data.errMsg, id)
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+
+    }
+
+    deleteJourneyByIndex(e, id) {
+        e.preventDefault();
+        let temp = this.state.journeyDetails;
+        temp.splice(id, 1)
+        this.setState({ journeyDetails: temp });
 
     }
     render() {
         return (
             <>
-                
-                    <Col>
-                        <Table className="table-bigboy">
-                            <thead>
-                                <tr>
-                                    
-                                    <th>时间</th>
-                                    <th className="text-right">交通类型</th>
-                                    <th className="text-right">时长</th>
-                                    <th className="th-description">概要信息</th>
-                                    <th className="th-description">具体描述</th>
-                                    
-                                    
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    
-                                    <td>8:30</td>
-                                    <td className="td-number">上门接送</td>
-                                    <td className="td-number">30分钟</td>
-                                    <td>新加坡虽然地盘小，但各处都分布着各种寺庙、岛屿、博物馆和特色街区等等旅游热点，如果只能在新加坡待上几天，
-                                    你肯定会觉得时间仓促</td>
-                                    <td>新加坡虽然地盘小，但各处都分布着各种寺庙、岛屿、博物馆和特色街区等等旅游热点，如果只能在新加坡待上几天，
-                                    你肯定会觉得时间仓促， 因为这里实在有着太多不容错过的景点与活动。艺术爱好者可以徜徉于博物馆和画廊，享受慵懒的下午； 
-                                    历史迷可以造访历史博物馆和文化遗产中心；狂欢派可以在陶醉在环球影城刺激的活动中；大自然爱好者可以沉浸在热带雨林和花园；全家人还可以在圣淘沙环岛畅游。
-                                    还不心动么？</td>
-                                    <td className="td-actions">
-                                        <OverlayTrigger
-                                            overlay={
-                                                <Tooltip id="tooltip-408856985">删除</Tooltip>
-                                            }
-                                            placement="left"
-                                        >
-                                            <Button
-                                                className="btn-link btn-icon"
-                                                type="button"
-                                                variant="danger"
-                                            >
-                                                <i className="fas fa-times"></i>
-                                            </Button>
-                                        </OverlayTrigger>
-                                    </td>
-                                </tr>
-                                
-                            </tbody>
-                        </Table>
+                {this.state.alert}
+                <Col>
+                    <Table className="table-bigboy">
+                        <thead>
+                            <tr>
 
-                    </Col>
-                    <Col>
-                    <Form>
+                                <th>时间</th>
+                                <th className="text-right">交通类型</th>
+                                <th className="text-right">时长</th>
+                                <th className="th-description">概要信息</th>
+                                <th className="th-description">具体描述</th>
+
+
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {this.state.journeyDetails.map((prop, key) => {
+                                return (
+                                    <tr key={key}>
+                                        <td>{prop.time}</td>
+                                        <td className="td-number">{prop.type}</td>
+                                        <td className="td-number">{prop.duration}</td>
+                                        <td>{prop.summary}</td>
+                                        <td>{prop.content}</td>
+                                        <td className="td-actions">
+                                            <OverlayTrigger
+                                                overlay={
+                                                    <Tooltip id="tooltip-408856985">删除</Tooltip>
+                                                }
+                                                placement="left"
+                                            >
+                                                <Button
+                                                    className="btn-link btn-icon"
+                                                    type="button"
+                                                    variant="danger"
+                                                    onClick={(e) => this.deleteJourneyByIndex(e, key)}
+
+                                                >
+                                                    <i className="fas fa-times"></i>
+                                                </Button>
+                                            </OverlayTrigger>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
+
+
+                        </tbody>
+                    </Table>
+
+                </Col>
+                <Col>
+                    <Button
+                        className="btn-fill pull-right"
+                        type="submit"
+                        variant="primary"
+                        onClick={this.uploadJourneyDetail}
+                    >
+                        保存行程
+                    </Button>
+                </Col>
+                <br></br>
+                <br></br>
+                <h4>添加新行程</h4>
+                <Col>
+                    <Form onSubmit={this.submitOneJourneyDetail}>
                         <Row>
-                            <Form.Group>
-                                <Button
-                                    className="btn-wd btn-outline mr-1"
-                                    type="button"
-                                    variant="info"
-                                >
-                                    <span className="btn-label">
-                                        <i className="fas fa-exclamation"></i>
-                                    </span>
-                        集合点
-                        </Button>
-                                <Button
-                                    className="btn-wd btn-outline mr-1"
-                                    type="button"
-                                    variant="info"
-                                >
-                                    <span className="btn-label">
-                                        <i className="fas fa-exclamation"></i>
-                                    </span>
-                        上门接
-                        </Button>
-                            </Form.Group>
+                            <Col md="2">
+                                <Form.Group>
+                                    <label>时间</label>
+                                    <Form.Control
+                                        value={this.state.tempTime}
+                                        placeholder="08:00"
+                                        type="text"
+                                        onChange={(e) => this.setState({ tempTime: e.target.value })}
+                                    ></Form.Control>
+                                </Form.Group>
+                            </Col>
+
+                        </Row>
+                        <Row>
+                            <Col md='3'>
+                                <ButtonGroup toggle>
+                                    {this.state.radios.map((radio, idx) => (
+                                        <ToggleButton
+                                            key={idx}
+                                            type="radio"
+                                            className="btn-outline"
+                                            variant="default"
+                                            name="radio"
+                                            value={radio.value}
+                                            checked={this.state.radioValue === radio.value}
+                                            onChange={(e) => this.setState({
+                                                radioValue: e.currentTarget.value,
+                                                tempType: e.currentTarget.name
+                                            })
+                                            }  >
+                                            {radio.name}
+                                        </ToggleButton>
+                                    ))}
+                                </ButtonGroup>
+                            </Col>
                         </Row>
 
-
                         <Row>
-                            <Col md="4">
+                            <Col >
                                 <Form.Group>
-                                    <label>集合地点</label>
+                                    <label>概要信息</label>
                                     <Form.Control
-                                        defaultValue=""
+                                        value={this.state.tempSummary}
                                         placeholder="输入集合地点或上门范围,以及额外费用说明"
                                         type="text"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <h4>行程设置</h4>
-                        <Row>
-                            <Col md="2">
-                                <Form.Group>
-                                    <label>集合时间/上门时间</label>
-                                    <ReactDatetime
-                                        dateFormat={false}
-                                        inputProps={{
-                                            className: "form-control",
-                                            placeholder: "00:00",
-                                        }}
-                                    ></ReactDatetime>
-                                </Form.Group>
-                            </Col>
-
-                            <Col md="2">
-
-                                <Form.Group>
-                                    <label>前往</label>
-                                    <Form.Control
-                                        defaultValue=""
-                                        placeholder=""
-                                        type="text"
+                                        onChange={(e) => this.setState({ tempSummary: e.target.value })}
                                     ></Form.Control>
                                 </Form.Group>
                             </Col>
                         </Row>
                         <Row>
-                            <Col md="4">
-                                <Form.Group>
-                                    <label>景点说明</label>
-                                    <Form.Control
-                                        defaultValue=""
-                                        placeholder="输入景点相关介绍"
-                                        type="text"
-                                    ></Form.Control>
-                                </Form.Group>
+                            <Col>
+                                <FormGroup controlId="formControlsTextareaInfo" >
+                                    <Form.Label>具体描述</Form.Label>
+                                    <FormControl as="textarea" row="10" placeholder="输入景点相关介绍"
+                                        value={this.state.tempContent}
+                                        onChange={(e) => this.setState({ tempContent: e.target.value })} />
+                                </FormGroup>
                             </Col>
                         </Row>
 
                         <Row>
                             <Col md="2">
                                 <Form.Group>
-                                    <label>结束时间</label>
-                                    <ReactDatetime
-                                        dateFormat={false}
-                                        inputProps={{
-                                            className: "form-control",
-                                            placeholder: "00:00",
-                                        }}
-                                    ></ReactDatetime>
-                                </Form.Group>
-                            </Col>
-
-                            <Col md="2">
-
-                                <Form.Group>
-                                    <label>前往</label>
+                                    <label>时长</label>
                                     <Form.Control
-                                        defaultValue=""
-                                        placeholder=""
+                                        value={this.state.tempDuration}
+                                        placeholder="30分钟"
                                         type="text"
+                                        onChange={(e) => this.setState({ tempDuration: e.target.value })}
                                     ></Form.Control>
                                 </Form.Group>
                             </Col>
                         </Row>
+
                         <Button
                             className="btn-fill pull-right"
                             type="submit"
                             variant="info"
                         >
-                            保存
+                            添加行程(仅添加到列表)
                     </Button>
                         <div className="clearfix"></div>
                     </Form>
-                    </Col>
-        </>
+
+                </Col>
+            </>
         );
     }
 }
 
-
+// third plain Notice-plain
 class NoticePlain extends React.Component {
-                    constructor(props) {
-                    super(props);
+    constructor(props) {
+        super(props);
         this.state = {
+            includeCost: [],
+            excludeCost: [],
+            trafficInclude: "",
+            foodInclude: "",
+            ticketInclude: "",
+            guideInclude: "",
+            otherInclude: "",
 
-                };
+        };
     }
     render() {
         return (
-                <>
-                    <Form>
-                        <h4>交通</h4>
+            <>
 
-                        <Row>
+                <Row>
+                    <Col md="6">
+                        <Card className="card-tasks">
+                            <Card.Header>
+                                <Card.Title as="h4">费用包含</Card.Title>
+                                <p className="card-category">商品费用包含说明</p>
+                            </Card.Header>
+                            <Card.Body>
+                                <div className="table-full-width">
 
-                            <Col md='2'>
+                                    <Table>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    交通
+                                                </td>
+                                                <td></td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>提供接送服务</InputGroup.Text>
+                                                        <FormControl id="inlineFormInputGroup" placeholder="请输入 去程/回程/全程 以及 旅游巴士/舒适商务车 以及 中文/英文/当地语言" />
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>景区内交通</InputGroup.Text>
+                                                        <FormControl id="inlineFormInputGroup" placeholder="" />
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
 
-                                <Form.Group>
-                                    <label>提供</label>
-                                    <Dropdown>
-                                        <Dropdown.Toggle
-                                            aria-expanded={false}
-                                            aria-haspopup={true}
-                                            data-toggle="dropdown"
-                                            id="containMeals"
-                                            variant="default"
-                                            className="m-0"
-                                        >
-                                            <span className="no-icon">请选择</span>
-                                        </Dropdown.Toggle>
-                                        <Dropdown.Menu aria-labelledby="navbarDropdownMenuLink">
-                                            <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                                                去程
-                  </Dropdown.Item>
-                                            <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                                                回程
-                  </Dropdown.Item>
-                                            <Dropdown.Item href="#pablo" onClick={(e) => e.preventDefault()}>
-                                                全程
-                  </Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </Dropdown>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group>
-                                    <label>接送服务</label>
-                                    <Form.Control
-                                        defaultValue=""
-                                        placeholder="补充说明"
-                                        type="text"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
 
-                            <Col md="4">
-                                <Form.Group>
-                                    <label>景区内交通</label>
-                                    <Form.Control
-                                        defaultValue=""
-                                        placeholder="自理"
-                                        type="text"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
+                                                    <FormControl id="inlineFormInputGroup" placeholder="其他交通费用说明" />
 
-                        </Row>
-                        <Row>
-                            <Col className="px-1" md="4">
-                                <Form.Group>
-                                    <label>其他交通费用说明</label>
-                                    <Form.Control
-                                        defaultValue=""
-                                        placeholder="不包含xxx"
-                                        type="text"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col className="pr-1" md="6">
-                                <Form.Group>
-                                    <label>商品名称</label>
-                                    <Form.Control
-                                        placeholder="请输入商品名称，不超过32个字"
-                                        type="text"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col md="12">
-                                <Form.Group>
-                                    <label>商品亮点</label>
-                                    <Row>
-                                        <Col md="3">
-                                            <Form.Control
-                                                placeholder="请输入产品特色"
-                                                type="text"
-                                            ></Form.Control>
-                                        </Col>
-                                        <Col md="3">
-                                            <Form.Control
-                                                placeholder="请输入产品特色"
-                                                type="text"
-                                            ></Form.Control>
-                                        </Col>
-                                        <Col md="3">
-                                            <Form.Control
-                                                placeholder="请输入产品特色"
-                                                type="text"
-                                            ></Form.Control>
-                                        </Col>
-                                        <Col md="3">
-                                            <Form.Control
-                                                placeholder="请输入产品特色"
-                                                type="text"
-                                            ></Form.Control>
-                                        </Col>
-                                    </Row>
-                                </Form.Group>
-                            </Col>
-                        </Row>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
 
-                        <Row>
-                            <Col className="pr-1" md="2">
-                                <Form.Group>
-                                    <label>起始时间</label>
-                                    <Form.Control
-                                        placeholder="00：00"
-                                        type="text"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
-                            <Col className="px-1" md="2">
-                                <Form.Group>
-                                    <label>结束时间</label>
-                                    <Form.Control
-                                        placeholder="00：00"
-                                        type="text"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
-                            <Col className="px-1" md="2">
-                                <Form.Group>
-                                    <label>景点个数</label>
-                                    <Form.Control
-                                        placeholder="景点数"
-                                        type="text"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
-                            <Col className="px-1" md="2">
-                                <Form.Group>
-                                    <label>景点用时(H)</label>
-                                    <Form.Control
-                                        placeholder="总时长"
-                                        type="text"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
+                                            <tr>
+                                                <td>
+                                                    餐饮
+                                                </td>
+                                                <td></td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>行程内包含餐饮说明</InputGroup.Text>
+                                                        <FormControl id="inlineFormInputGroup" placeholder="例如：包含午餐" />
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    门票
+                                                </td>
+                                                <td></td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>行程中所列景点的大门门票</InputGroup.Text>
+                                                        <FormControl id="inlineFormInputGroup" placeholder="补充说明" />
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>行程中所列景点的所有门票</InputGroup.Text>
+                                                        <FormControl id="inlineFormInputGroup" placeholder="补充说明" />
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <FormControl id="inlineFormInputGroup" placeholder="其他门票费用说明" />
 
-                            <Col className="px-1" md="2">
-                                <Form.Group>
-                                    <label>集合地点</label>
-                                    <Form.Control
-                                        placeholder="请输入"
-                                        type="text"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    司导
+                                                </td>
+                                                <td></td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>包含</InputGroup.Text>
+                                                        <FormControl id="inlineFormInputGroup" placeholder="司机/导游/司机兼导游 服务费 讲解器费用" />
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+
+                                                    <FormControl id="inlineFormInputGroup" placeholder="其他关于司导/讲解器的费用说明" />
+
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
 
 
-                        </Row>
-                        <Row>
-                            <Col md="12">
-                                <Form.Group>
-                                    <label>商品图片</label>
-                                    <Form.Control
-                                        cols="80"
-                                        placeholder="上传图片不超过20张"
-                                        rows="4"
-                                        as="textarea"
-                                    ></Form.Control>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Button
-                            className="btn-fill pull-right"
-                            type="submit"
-                            variant="info"
-                        >
-                            保存
+                                            <tr>
+                                                <td>
+                                                    其他
+                                                </td>
+                                                <td></td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+
+                                                    <FormControl id="inlineFormInputGroup" placeholder="自定义, 如针对特殊人群的费用包含说明" />
+
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                        </tbody>
+                                    </Table>
+                                </div>
+                                <Button
+                                    className="btn-fill pull-right"
+                                    type="submit"
+                                    variant="info"
+                                >
+                                    保存
                     </Button>
-                        <div className="clearfix"></div>
-                    </Form>
-                </>
+                                <div className="clearfix"></div>
+
+
+                            </Card.Body>
+
+                        </Card>
+                    </Col>
+                    <Col md="6">
+                        <Card className="card-tasks">
+                            <Card.Header>
+                                <Card.Title as="h4">费用不含</Card.Title>
+                                <p className="card-category">商品费用不包含说明</p>
+                            </Card.Header>
+                            <Card.Body>
+                                <div className="table-full-width">
+
+                                    <Table>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    交通
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>超出指定接送区域，需额外支付一定费用</InputGroup.Text>
+                                                        <FormControl id="inlineFormInputGroup" placeholder="费用规则" />
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>景区内交通</InputGroup.Text>
+                                                        <FormControl id="inlineFormInputGroup" placeholder="如xxx景区内公交费用5欧" />
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+
+                                                    <FormControl id="inlineFormInputGroup" placeholder="其他交通费用说明" />
+
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>
+                                                    餐饮
+                                                </td>
+                                                <td></td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>行程内不含餐饮说明</InputGroup.Text>
+                                                        <FormControl id="inlineFormInputGroup" placeholder=" " />
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    门票
+                                                </td>
+                                                <td></td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>具体门票价格以实际价格为准</InputGroup.Text>
+
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+
+                                                    <FormControl id="inlineFormInputGroup" placeholder="其他门票费用说明" />
+
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    司导
+                                                </td>
+                                                <td></td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>不含</InputGroup.Text>
+                                                        <FormControl id="inlineFormInputGroup" placeholder="司机/导游/司机兼导游服务费, 需支付约xx欧" />
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+                                                    <InputGroup>
+                                                        <InputGroup.Text>此商品未包含小费费用,如果您对我们的服务感到满意,可酌情给予小费</InputGroup.Text>
+
+                                                    </InputGroup>
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+
+                                                    <FormControl id="inlineFormInputGroup" placeholder="其他关于司导/讲解器的不包含费用说明" />
+
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>
+                                                    其他
+                                                </td>
+                                                <td></td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <Form.Check className="mb-1 pl-0">
+                                                        <Form.Check.Label>
+                                                            <Form.Check.Input
+                                                                defaultValue=""
+                                                                type="checkbox"
+                                                            ></Form.Check.Input>
+                                                            <span className="form-check-sign"></span>
+                                                        </Form.Check.Label>
+                                                    </Form.Check>
+                                                </td>
+                                                <td>
+
+                                                    <FormControl id="inlineFormInputGroup" placeholder="自定义,如针对特殊人群的费用不包含说明" />
+
+                                                </td>
+                                                <td className="td-actions text-right"></td>
+                                            </tr>
+                                        </tbody>
+                                    </Table>
+                                </div>
+                                <Button
+                                    className="btn-fill pull-right"
+                                    type="submit"
+                                    variant="info"
+                                >
+                                    保存
+                    </Button>
+                                <div className="clearfix"></div>
+
+                            </Card.Body>
+
+                        </Card>
+                    </Col>
+                </Row>
+
+            </>
         );
     }
 }
